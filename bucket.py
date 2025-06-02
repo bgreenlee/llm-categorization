@@ -88,7 +88,59 @@ def get_document_content(input_path):
     return content
 
 
-def analyze_document(tags, document_path):
+def log_cost_information(usage):
+    """Log cost information based on API usage."""
+    # Anthropic pricing for Claude models (as of recent pricing)
+    # These are approximate rates - check current Anthropic pricing for exact values
+    pricing = {
+        "claude-opus-4-0": {
+            "input": 0.000015,
+            "output": 0.000075,
+        },  # $15/$75 per MTok
+        "claude-sonnet-4-0": {
+            "input": 0.000003,
+            "output": 0.000015,
+        },  # $3/$15 per MTok
+        "claude-3-7-sonnet-latest": {
+            "input": 0.000003,
+            "output": 0.000015,
+        },  # $3/$15 per MTok
+        "claude-3-5-haiku-latest": {
+            "input": 0.00000080,
+            "output": 0.000004,
+        },  # $0.80/$4 per MTok
+        "claude-3-opus-latest": {
+            "input": 0.000015,
+            "output": 0.000075,
+        },  # $15/$75 per MTok
+        # Default fallback pricing (using Sonnet rates)
+        "default": {"input": 0.000003, "output": 0.000015},
+    }
+
+    model = os.getenv("MODEL", "claude-sonnet-4-0")
+    rates = pricing.get(model, pricing["default"])
+
+    input_tokens = usage.input_tokens
+    output_tokens = usage.output_tokens
+
+    input_cost = input_tokens * rates["input"]
+    output_cost = output_tokens * rates["output"]
+    total_cost = input_cost + output_cost
+
+    print("\n" + "="*50)
+    print("ANTHROPIC API COST INFORMATION")
+    print("="*50)
+    print(f"Model: {model}")
+    print(f"Input tokens: {input_tokens:,}")
+    print(f"Output tokens: {output_tokens:,}")
+    print(f"Total tokens: {input_tokens + output_tokens:,}")
+    print(f"Input cost: ${input_cost:.6f}")
+    print(f"Output cost: ${output_cost:.6f}")
+    print(f"Total cost: ${total_cost:.6f}")
+    print("="*50)
+
+
+def analyze_document(tags, document_path, track_cost=False):
     """Analyze a document with the given tags."""
     # load template environment
     jinja = Environment(
@@ -117,14 +169,14 @@ def analyze_document(tags, document_path):
 
     # print(tagging_prompt)
     # Call Anthropic API
-    model = os.getenv("MODEL", "claude-sonnet-4-20250514")
+    model = os.getenv("MODEL", "claude-sonnet-4-0")
     logger.debug(f"using model: {model}")
 
     client = anthropic.Anthropic()
 
     message = client.messages.create(
         model=model,
-        max_tokens=10000,
+        max_tokens=20000,
         temperature=1,
         messages=[
             {
@@ -134,6 +186,10 @@ def analyze_document(tags, document_path):
         ],
     )
     print(message.content[0].text)
+
+    if track_cost:
+        return message.usage
+    return None
 
 
 def main():
@@ -152,6 +208,11 @@ def main():
         help="Comma-separated list of tags to use for analysis",
         default=""
     )
+    parser.add_argument(
+        "--cost",
+        action="store_true",
+        help="Log Anthropic API cost information at the end"
+    )
 
     args = parser.parse_args()
 
@@ -159,7 +220,10 @@ def main():
     tags = [tag.strip() for tag in args.tags.split(",") if tag.strip()] if args.tags else []
 
     # Analyze document
-    analyze_document(tags, args.document)
+    usage = analyze_document(tags, args.document, track_cost=args.cost)
+
+    if args.cost and usage:
+        log_cost_information(usage)
 
 
 if __name__ == "__main__":
