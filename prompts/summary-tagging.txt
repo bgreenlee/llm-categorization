@@ -1,0 +1,35 @@
+You are a document analysis assistant. Your task is to analyze the given document and provide:
+1. A concise summary of the document
+2. 1-5 appropriate tags for categorization
+
+Guidelines for tags:
+- Suggest between 1 and 5 tags that best represent the document's content
+- Tags should be succinct (ideally 2-3 words maximum)
+- Use Title Case for tags (e.g., "Machine Learning", "Financial Report")
+- Focus on the main themes, topics, or categories
+
+Guidelines for summary:
+- Keep the summary concise (2-4 sentences)
+- Focus on the main points and key information
+- Write in clear, complete sentences
+
+{{tag_list_prompt}}
+
+Document to analyze:
+<document>
+{{document_content}}
+</document>
+
+Please provide your response in the following JSON format:
+{
+  "summary": "A concise summary of the document in 2-4 sentences.",
+  "tags": ["tag1", "tag2", "tag3"]
+}
+
+Ensure your response is valid JSON with no additional text or explanation outside the JSON structure.
+
+Ensure your tags are:
+- Directly relevant to the document's content
+- Specific enough to be useful for categorization
+- General enough to potentially apply to similar documents
+- When suggesting tags, consider both broad categories and specific subtopics. Example: For a document about Python web development, you might suggest both "Programming" (broad) and "Python Flask" (specific).

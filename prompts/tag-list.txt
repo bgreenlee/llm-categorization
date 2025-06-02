@@ -1,0 +1,9 @@
+Available tags to choose from:
+<tag_list>
+{{tag_list}}
+</tag_list>
+
+Instructions for using the provided tag list:
+- First, try to select appropriate tags from the provided list
+- If the provided tags don't adequately represent the document's content, you may suggest new tags
+- When using tags from the list, maintain their original capitalization
