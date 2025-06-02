@@ -8,6 +8,13 @@ Guidelines for tags:
 - Use Title Case for tags (e.g., "Machine Learning", "Financial Report")
 - Focus on the main themes, topics, or categories
 
+CRITICAL FORMATTING RULE:
+- You MUST match the exact case style of any provided tags
+- If provided tags are lowercase (e.g., "machine learning", "data analysis"), ALL your suggested tags must be lowercase
+- If provided tags are Title Case (e.g., "Machine Learning", "Data Analysis"), ALL your suggested tags must be Title Case
+- If provided tags are UPPERCASE (e.g., "MACHINE LEARNING"), ALL your suggested tags must be UPPERCASE
+- This rule applies to BOTH tags selected from the list AND any new tags you create
+
 Guidelines for summary:
 - Keep the summary concise (2-4 sentences)
 - Focus on the main points and key information
@@ -25,6 +32,15 @@ Please provide your response in the following JSON format:
   "summary": "A concise summary of the document in 2-4 sentences.",
   "tags": ["tag1", "tag2", "tag3"]
 }
+
+If there are tags you think should be included that aren't in the provided tag list, you should add a "suggested_tags" field:
+{
+  "summary": "A concise summary of the document in 2-4 sentences.",
+  "tags": ["tag1", "tag2", "tag3"],
+  "suggested_tags": ["new tag1", "new tag2"]
+}
+
+It is important that any suggested tags follow the same style and case of any provided tags (for example, if the provided tags are all lowercase, your suggested tags should be lowercase).
 
 Ensure your response is valid JSON with no additional text or explanation outside the JSON structure.
 
