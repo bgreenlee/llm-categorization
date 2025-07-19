@@ -2,6 +2,7 @@ import os
 import logging
 import argparse
 import sys
+import tempfile
 from urllib.parse import urlparse
 from pathlib import Path
 
@@ -22,19 +23,41 @@ logger = logging.getLogger(__name__)
 def extract_text_from_url(url):
     """Extract human-readable text content from a URL."""
     try:
-        # Download the page
-        downloaded = trafilatura.fetch_url(url)
-        if downloaded is None:
-            logger.error(f"Failed to download content from URL: {url}")
-            return None
+        # First, get the content type by making a HEAD request
+        response = requests.head(url, allow_redirects=True, timeout=10)
+        content_type = response.headers.get('content-type', '').lower()
 
-        # Extract text content
-        text = trafilatura.extract(downloaded)
-        if text is None:
-            logger.error(f"Failed to extract text from URL: {url}")
-            return None
+        if 'application/pdf' in content_type:
+            # Handle PDF content
+            pdf_response = requests.get(url, timeout=30)
+            pdf_response.raise_for_status()
 
-        return text
+            # Save PDF temporarily and extract text
+            with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp_file:
+                temp_file.write(pdf_response.content)
+                temp_file_path = temp_file.name
+
+            try:
+                text = extract_text_from_pdf(temp_file_path)
+                return text
+            finally:
+                # Clean up temporary file
+                os.unlink(temp_file_path)
+        else:
+            # Handle HTML or other text content using trafilatura
+            downloaded = trafilatura.fetch_url(url)
+            if downloaded is None:
+                logger.error(f"Failed to download content from URL: {url}")
+                return None
+
+            # Extract text content
+            text = trafilatura.extract(downloaded)
+            if text is None:
+                logger.error(f"Failed to extract text from URL: {url}")
+                return None
+
+            return text
+
     except Exception as e:
         logger.error(f"Error extracting text from URL {url}: {e}")
         return None
