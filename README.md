@@ -1,6 +1,8 @@
-# Bucket Categorization Experiment
+# LLM Categorization Experiment
 
-Proof-of-concept for categorizing/tagging links.
+Proof-of-concept of using an LLM for categorizing/tagging links.
+
+Requires an [Anthropic API key](https://docs.anthropic.com/en/api/admin-api/apikeys/get-api-key), but could be easily modified to use any LLM.
 
 ## Setup
 
